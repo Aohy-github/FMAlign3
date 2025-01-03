@@ -6,6 +6,8 @@ data/*
 build/
 
 out_res/
+!out_res/.gitkeep
+
 ./.vscode
 .idea/
 .cmake-build-debug
