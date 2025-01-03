@@ -59,7 +59,7 @@ int main(int argc,char* argv[]) {
   // Align
   aligner.alignEnd2End(match_function,NULL,patternLength,textLength);
   cout << "WFA-Alignment returns score " << aligner.getAlignmentScore() << endl;
-
+  
   // Print CIGAR
   string cigar = aligner.getAlignment();
   cout << "PATTERN: " << pattern  << endl;
