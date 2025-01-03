@@ -1,0 +1,12 @@
+tmp_file/*
+!tmp_file/.gitkeep
+data/*
+!data/.gitkeep
+
+build/
+
+out_res/
+./.vscode
+.idea/
+.cmake-build-debug
+logfile.txt
