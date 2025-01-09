@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 # project(Crossfire LANGUAGES CUDA CXX)
-project(Crossfire CXX C CUDA)
+project(Crossfire CXX C)
 
 # 指定使用 GCC 12 和 G++ 12
 # set(CMAKE_C_COMPILER gcc-12)
 # set(CMAKE_CXX_COMPILER g++-12)
 
-set(CMAKE_CUDA_STANDARD 20)
-set(CMAKE_CUDA_STANDARD_REQUIRED True)
+# set(CMAKE_CUDA_STANDARD 20)
+# set(CMAKE_CUDA_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -47,7 +47,7 @@ add_executable(Crossfire
 
 
 # 启用 CUDA 可分离编译
-set_target_properties(Crossfire PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+# set_target_properties(Crossfire PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 
 
@@ -60,9 +60,9 @@ target_link_libraries(Crossfire PRIVATE
         ${Boost_LIBRARIES}
 )
 
-set_target_properties(Crossfire PROPERTIES
-    CUDA_ARCHITECTURES 89  # 根据您的 GPU 计算能力设置
-)
+# set_target_properties(Crossfire PROPERTIES
+#     CUDA_ARCHITECTURES 89  # 根据您的 GPU 计算能力设置
+# )
 
 # 包含头文件目录
 target_include_directories(Crossfire PRIVATE

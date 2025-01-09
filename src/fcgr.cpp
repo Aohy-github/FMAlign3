@@ -14,6 +14,10 @@ namespace FCGR_CU {
         char_to_code['C'] = 2;
         char_to_code['G'] = 3;
 
+        char_to_code['a'] = 0;
+        char_to_code['t'] = 1;
+        char_to_code['c'] = 2;
+        char_to_code['g'] = 3;
         std::vector<int> k_mer_CPU(seq.k_mer_list.size() , 0);
         std::string content = seq.content;
         int lens = content.size();
@@ -36,14 +40,14 @@ namespace FCGR_CU {
  
     void one_cluster::genClusters_CPU() {
         for (int i = 0 ;i < this->total_SeqList.size() ; i++) {
-            PLOGD << "this->total_SeqList : " << this->total_SeqList[i];
+            // PLOGD << "this->total_SeqList : " << this->total_SeqList[i];
             this->hashMap[this->total_SeqList[i]] = false;
         }
         int seq_count = this->total_SeqList.size();
 
         while (seq_count >= 1) {
             int long_id = getLoneID();
-            PLOGD << "long_id : " << long_id;
+            // PLOGD << "long_id : " << long_id;
             if (long_id >= 0) {
                 this->cluster[long_id] = get_smi_seqs_CPU(long_id);
                 seq_count -= this->cluster[long_id].size();
@@ -66,7 +70,11 @@ namespace FCGR_CU {
                 long long tmpB = All_seqs[this->total_SeqList[i]].A_A;
                 long long reP = one_cluster::get_Respoint(All_seqs[long_id].k_mer_list , All_seqs[this->total_SeqList[i]].k_mer_list);
                 double tmp_smi = reP / (sqrt(tmpB)*sqrt(tmpA));
-                // std::cout << "tmp_smi : " << tmp_smi << std::endl;
+                std::cout << "tmp_smi : " << tmp_smi << std::endl;
+                
+                distance_matrix[long_id][this->total_SeqList[i]] = tmp_smi;
+                distance_matrix[this->total_SeqList[i]][long_id] = tmp_smi;
+
                 if (tmp_smi >= this->sim) {
                     res.push_back(this->total_SeqList[i]);
                     this->hashMap[this->total_SeqList[i]] = true;

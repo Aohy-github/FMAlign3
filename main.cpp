@@ -53,68 +53,64 @@ int main(int argc, char* argv[]) {
 
 
     All_seqs = get_sequence(filename);
-    PLOGD << "get seqs : "<<All_seqs.size();
+    // PLOGD << "get seqs : "<<All_seqs.size();
 
 
 
-    PLOGD << "===== START FCGR =====";
+    // PLOGD << "===== START FCGR =====";
 
-    auto CPU_start = std::chrono::high_resolution_clock::now();
-    oneapi::tbb::parallel_for_each(All_seqs.begin(), All_seqs.end(), [&](Seq& one){
-        bool bo = FCGR_CU::get_one_FCGR_CPU(one);
-        if(!bo){
-            std::cout << one.name << "false !" << std::endl;
-        }
-        //PLOGD<<"kmer.size()  : " << one.k_mer_list.size();
-    });
-
-    auto CPU_end = std::chrono::high_resolution_clock::now();
-
-    std::chrono::duration<double, std::milli> CPU_time = CPU_end - CPU_start;
-
-    
-    // exit(0);
-    PLOGD << "===== FINISH FCGR =====" << "CPU time : " << CPU_time.count() << " ms";
-    std::cout << "===== FINISH FCGR =====" << "CPU time : " << CPU_time.count() << " ms\n";
-    PLOGD << "";
-    PLOGD << "";
-    PLOGD <<std::setw(10)<< std::setfill(' ') <<"   =====   START CLUSTER   =====   ";
-    PLOGD << "";
-    PLOGD << "";
-    auto cluster_start = std::chrono::high_resolution_clock::now();
-    
-    
-    
-    Cluster::Clu cluster;
-    cluster.get_cluster_two();
-
-
-
-
-
-    auto cluster_end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> cluster_time = cluster_end - cluster_start;
-    
-
-    // int count = 0;
-    // for (auto tmp : cluster.TOP_clusters) {
-    //     if (tmp.second.size() > 1) {
-    //         std::cout <<" size > 2 : "<< tmp.second.size() << std::endl;
-    //         count += tmp.second.size();
+    // auto CPU_start = std::chrono::high_resolution_clock::now();
+    // oneapi::tbb::parallel_for_each(All_seqs.begin(), All_seqs.end(), [&](Seq& one){
+    //     bool bo = FCGR_CU::get_one_FCGR_CPU(one);
+    //     if(!bo){
+    //         std::cout << one.name << "false !" << std::endl;
     //     }
-    // }
-    // std::cout << "count : "<< count << std::endl;
-    PLOGD << "";
-    PLOGD << "";
-    PLOGD << "cluster size : " << cluster.TOP_clusters.size();
-    PLOGD << "";
-    PLOGD << "";
-    PLOGD << "===== FINISH CLUSTER =====" << "time : " << cluster_time.count() << " ms";
-    std::cout << "===== FINISH CLUSTER =====" << "time : " << cluster_time.count() << " ms\n";
-    PLOGD << "";
-    PLOGD << "";
+    //     //PLOGD<<"kmer.size()  : " << one.k_mer_list.size();
+    // });
 
-    PLOGD << "===== START ALIGN =====";
+    // auto CPU_end = std::chrono::high_resolution_clock::now();
+
+    // std::chrono::duration<double, std::milli> CPU_time = CPU_end - CPU_start;
+
+    
+    // // // exit(0);
+    // PLOGD << "===== FINISH FCGR =====" << "CPU time : " << CPU_time.count() << " ms";
+    // std::cout << "===== FINISH FCGR =====" << "CPU time : " << CPU_time.count() << " ms\n";
+    // PLOGD << "";
+    // PLOGD << "";
+    // PLOGD <<std::setw(10)<< std::setfill(' ') <<"   =====   START CLUSTER   =====   ";
+    // PLOGD << "";
+    // PLOGD << "";
+    // auto cluster_start = std::chrono::high_resolution_clock::now();
+    
+    
+    
+    // Cluster::Clu cluster;
+    // cluster.get_cluster_two();
+
+    // auto cluster_end = std::chrono::high_resolution_clock::now();
+    // std::chrono::duration<double, std::milli> cluster_time = cluster_end - cluster_start;
+    
+
+    // // int count = 0;
+    // // for (auto tmp : cluster.TOP_clusters) {
+    // //     if (tmp.second.size() > 1) {
+    // //         std::cout <<" size > 2 : "<< tmp.second.size() << std::endl;
+    // //         count += tmp.second.size();
+    // //     }
+    // // }
+    // // std::cout << "count : "<< count << std::endl;
+    // PLOGD << "";
+    // PLOGD << "";
+    // PLOGD << "cluster size : " << cluster.TOP_clusters.size();
+    // PLOGD << "";
+    // PLOGD << "";
+    // PLOGD << "===== FINISH CLUSTER =====" << "time : " << cluster_time.count() << " ms";
+    // std::cout << "===== FINISH CLUSTER =====" << "time : " << cluster_time.count() << " ms\n";
+    // PLOGD << "";
+    // PLOGD << "";
+
+    // PLOGD << "===== START ALIGN =====";
     // 进行比对 1.对每个群组进行比对，
     // for(auto& tmp : cluster.TOP_clusters) {
     //     PLOGD << "tmp.first : " << tmp.first;
@@ -130,6 +126,7 @@ int main(int argc, char* argv[]) {
             
     // }
     // bool bo = false;
+    
     // if(bo){
     //     tbb::parallel_for_each(cluster.TOP_clusters.begin(), cluster.TOP_clusters.end(), [&](auto& tmp){
     //         std::vector<int> seq_id_list = tmp.second;
@@ -150,9 +147,23 @@ int main(int argc, char* argv[]) {
     //     }
     // }
     // }
+    // // 处理每个群组
+    // for(int i = 0; i < distance_matrix.size(); i++)
+    //     std::cout <<std::setw(15)<< All_seqs[i].name.substr(0,5) << " ";
+    // std::cout << std::endl;
+    // for(int i = 0; i < distance_matrix.size(); i++){
+    //     std::cout<< All_seqs[i].name.substr(0,5) << " ";
+    //     for(int j = 0; j < distance_matrix.size(); j++){
+    //         std::cout <<std::setw(13)<< distance_matrix[i][j];
+    //     }
+    //     std::cout << std::endl;
+    // }
     
-    process_more_seq_and_lens_less_10000(cluster.TOP_clusters[0]);
-    
+    std::vector<int> seq_id_list;
+    for(int i = 0; i < All_seqs.size(); i++){
+        seq_id_list.push_back(i);
+    }
+    process_more_seq_and_lens_less_10000(seq_id_list);
     out_sequence(outfilename);
     
    

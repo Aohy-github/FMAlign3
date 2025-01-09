@@ -1,0 +1,40 @@
+-- 
+
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/aohy/CLionProjects/Crossfire/build
+make: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[1]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+[ 32%] Built target wfa2
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+[ 32%] Building CXX object CMakeFiles/Crossfire.dir/src/align_seq.cpp.o
+[ 33%] Linking CXX executable Crossfire
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+[ 40%] Built target Crossfire
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+[ 72%] Built target wfa2_static
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+[ 74%] Built target wfa2cpp_static
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+[ 76%] Built target wfa2cpp
+make[2]: 进入目录“/home/aohy/CLionProjects/Crossfire/build”
+make[2]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+[100%] Built target align_benchmark
+make[1]: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+make: 离开目录“/home/aohy/CLionProjects/Crossfire/build”
+=== MERGE ===
+===== FINISH =====time : 28.53 ms
+672 sequences found
+calculating
+...done
+SP score: 21823771.0
+Avg SP score: 96.79835976864665
+Scaled SP score: 0.0058217573686562005
+Finish!

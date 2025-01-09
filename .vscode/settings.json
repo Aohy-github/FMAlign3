@@ -86,6 +86,8 @@
         "__config": "cpp",
         "locale": "cpp",
         "__functional_base": "cpp",
-        "__bit_reference": "cpp"
+        "__bit_reference": "cpp",
+        "typeindex": "cpp",
+        "ios": "cpp"
     }
 }

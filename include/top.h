@@ -44,13 +44,16 @@ typedef struct Sequences
     int k_mer_size = 0;
     long long A_A; // 内积
     std::vector<int> k_mer_list;
+    // 保存所比对的中心序列的间隔
+    std::vector<std::pair<int,int>> center_gap_list;
+    std::vector<std::pair<int,int>> self_gap_list;
     // 总的k-mer可能性为 4^K
     Sequences(std::string name, std::string seq, int K , int lens):name(name), content(seq), k_mer_size(K), k_mer_list(1 << (2*K),0) , lens(lens) {};
 
 }Seq;
 
 inline std::vector<Seq> All_seqs;
-
+inline std::vector<std::vector<double>> distance_matrix;
 
 
 

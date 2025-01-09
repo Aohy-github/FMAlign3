@@ -79,9 +79,9 @@ namespace Cluster {
 
             PLOGD << "this lens_clusters count : " << tmp.second.size();
 
-            for(int i = 0; i < tmp.second.size(); i++){
-                PLOGD << "seq id : " << tmp.second[i];
-            }
+            // for(int i = 0; i < tmp.second.size(); i++){
+            //     PLOGD << "seq id : " << tmp.second[i];
+            // }
 
 
             FCGR_CU::one_cluster one_cluster(0.9,tmp.second);
@@ -101,8 +101,4 @@ namespace Cluster {
         std::chrono::duration<double, std::milli> CPU_time = CPU_end - CPU_start;
         PLOGD << "CPU time: " << CPU_time.count() << " ms";
     }
-    void Clu::get_cluster_three() {
-
-    }
-
 }
