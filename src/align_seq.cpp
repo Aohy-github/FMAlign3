@@ -293,7 +293,7 @@ std::vector<std::vector<MID_Seq>> get_split_chain_table(std::vector<std::vector<
     std::cout << "===== get_split_chain_table =====" << std::endl;
     std::vector<std::vector<std::pair<int,int>>> res_chain(seq_id_list.size());
     int pre = 0;
-    int spand = 10000;
+    int spand = 1000;
     for(int i = 0; i < chain_table[0].size() ; i++){ // 列遍历
         int location = chain_table[0][i].second;
         int distance = (location - pre);
@@ -523,7 +523,7 @@ void star_align(std::vector<int> seq_id_list , std::vector<std::vector<MID_Seq>>
     //     }
     //     PLOGD << " ===================== ";
     // }
-    tbb::task_arena limited_arena(16);
+    tbb::task_arena limited_arena(1);
     limited_arena.execute([&split_seq_list] {
         tbb::parallel_for_each(split_seq_list.begin(), split_seq_list.end(),[&](std::vector<MID_Seq>& mid_seq){
             std::string text_seq = mid_seq[0].content;
