@@ -15,7 +15,7 @@ fi
     # //23s_rRNA.fasta
     # // chr1.fasta
     # data/Ecoli.fasta
-./build/Crossfire -i ./data/mt1x.fasta -o ./out_res/test.out.fasta
+time ./build/Crossfire -i ./data/mt1x.fasta -o ./out_res/test.out.fasta > test_log.txt
 
 python3 ./out_res/SPscore.py --input ./out_res/test.out.fasta --match 0 --mismatch 1 --gap1 1 --gap2 1
 

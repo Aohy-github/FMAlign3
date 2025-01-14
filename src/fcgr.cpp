@@ -70,7 +70,7 @@ namespace FCGR_CU {
                 long long tmpB = All_seqs[this->total_SeqList[i]].A_A;
                 long long reP = one_cluster::get_Respoint(All_seqs[long_id].k_mer_list , All_seqs[this->total_SeqList[i]].k_mer_list);
                 double tmp_smi = reP / (sqrt(tmpB)*sqrt(tmpA));
-                std::cout << "tmp_smi : " << tmp_smi << std::endl;
+                //std::cout << "tmp_smi : " << tmp_smi << std::endl;
                 
                 distance_matrix[long_id][this->total_SeqList[i]] = tmp_smi;
                 distance_matrix[this->total_SeqList[i]][long_id] = tmp_smi;
