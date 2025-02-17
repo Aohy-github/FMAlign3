@@ -12,12 +12,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_definitions(-mavx -mavx2 -mlzcnt -mbmi -DDEBUG=1)
+set(TBB_TEST OFF CACHE BOOL "Enable testing" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "Disable building oneTBB examples" FORCE)
 
+add_subdirectory(submodule/WFA2-lib)
+add_subdirectory(submodule/oneTBB)
+add_subdirectory(submodule/plog)
+add_subdirectory(submodule/spdlog)
 
-add_subdirectory(PSA/WFA2-lib)
-
-# 查找 TBB
-find_package(TBB REQUIRED)
 
 # 包含 Boost 库
 find_package(Boost 1.71.0 COMPONENTS program_options REQUIRED)
@@ -37,8 +39,7 @@ add_executable(Crossfire
         src/readfile.cpp
         src/cluster.cpp
         src/align_seq.cpp
-        src/fmindex.cpp
-        PSA/WFA2-lib/bindings/cpp/WFAligner.cpp
+        submodule/WFA2-lib/bindings/cpp/WFAligner.cpp
         include/bwt.cpp
         include/ssw.c
         include/ssw_cpp.cpp
@@ -46,28 +47,20 @@ add_executable(Crossfire
 )
 
 
-# 启用 CUDA 可分离编译
-# set_target_properties(Crossfire PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-
-
-
 # 链接 库
 target_link_libraries(Crossfire PRIVATE
         TBB::tbb
         OpenMP::OpenMP_CXX
         Threads::Threads
-        wfa2
+        wfa2::wfa2
+        plog::plog
         ${Boost_LIBRARIES}
+        spdlog::spdlog
 )
 
-# set_target_properties(Crossfire PROPERTIES
-#     CUDA_ARCHITECTURES 89  # 根据您的 GPU 计算能力设置
-# )
 
 # 包含头文件目录
 target_include_directories(Crossfire PRIVATE
-        ${PROJECT_SOURCE_DIR}/plog/include
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/PSA/WFA2-lib/bindings/cpp
 )

@@ -88,6 +88,9 @@
         "__functional_base": "cpp",
         "__bit_reference": "cpp",
         "typeindex": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "strstream": "cpp",
+        "complex": "cpp",
+        "source_location": "cpp"
     }
 }

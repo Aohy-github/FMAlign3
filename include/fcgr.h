@@ -13,6 +13,7 @@
 namespace FCGR_CU {
     // bool get_one_FCGR_GPU(Seq& seq);
     bool get_one_FCGR_CPU(Seq& seq);
+    long long get_Respoint(std::vector<int>& A_kmer_list, std::vector<int>& B_kmer_list);
     // __global__ void computeProducts(const int* kmerA, const int* kmerB, double* dotProduct, double* sumA, double* sumB, int n);
     // __global__ void cuda_processSeqFCGR(int n, const char* str, int K, int* k_mer_Matrix);
     class one_cluster {
@@ -33,7 +34,6 @@ namespace FCGR_CU {
         // 根据long_id进行聚类
         //std::vector<int> get_smi_seqs_GPU(int long_id);
         std::vector<int> get_smi_seqs_CPU(int long_id);
-        long long get_Respoint(std::vector<int>& A_kmer_list, std::vector<int>& B_kmer_list);
     };
 }
 

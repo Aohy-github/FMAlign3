@@ -12,7 +12,7 @@ void mode_pick(std::vector<int> seq_id_list) {
     PLOGD << "seq_lens : " << seq_lens;
     auto time_start = std::chrono::high_resolution_clock::now();
     //build_index_and_chain(seq_id_list , k_mer);
-    if(seq_lens > 10 && seq_id_list.size() > 2){   
+    if(seq_lens >= 10000 && seq_id_list.size() > 2){   
         PLOGD <<"处理多条长度大余10000的序列";
         /*
             1.构建fmindex，构建分割点
@@ -26,22 +26,47 @@ void mode_pick(std::vector<int> seq_id_list) {
         merge_and_split(split_seq_list ,seq_id_list);
         std::cout << "==== FINISH BUILD INDEX AND CHAIN ====" << std::endl;
     }
-    else if(seq_lens <= 20000 && seq_id_list.size() >= 2){ 
+    else if(seq_lens <= 10000 && seq_id_list.size() >= 2){ 
         PLOGD<< "处理多条长度小余10000的序列";
 
         /**
          * 1.进行中心序列的比对
          * 
          */
-        //star_align(seq_id_list , split_seq_list);
-        
-    }else if(seq_lens >= 20000 && seq_id_list.size() == 2){ 
-        PLOGD << "处理两条序列 但很长的序列";
-        build_index_and_chain(seq_id_list , k_mer);   
+        std::vector<std::vector<MID_Seq>> not_split_seq_list;
 
-    }else if(seq_lens <= 20000 && seq_id_list.size() == 2){ 
+        for(int i = 0; i < seq_id_list.size(); i++){
+            std::vector<MID_Seq> tmp;
+            tmp.push_back(MID_Seq(All_seqs[seq_id_list[i]].content));
+            not_split_seq_list.push_back(tmp);
+        }
+
+        star_align(seq_id_list , not_split_seq_list);
+        merge_and_split(not_split_seq_list,seq_id_list);
+        // 输出中间结果
+        // for(int i = 0; i < seq_id_list.size(); i++){
+        //     PLOGD <<" , seq_name : " << All_seqs[seq_id_list[i]].name << ": " << All_seqs[seq_id_list[i]].content;
+        // }
+    }else if(seq_lens >= 10000 && seq_id_list.size() == 2){ 
+        PLOGD << "处理两条序列 但很长的序列";
+        std::vector<std::vector<std::pair<int,int>>> chain_table = build_index_and_chain(seq_id_list , k_mer);
+        std::vector<std::vector<MID_Seq>> split_seq_list = get_split_chain_table(chain_table,seq_id_list, k_mer);
+        
+        star_align(seq_id_list , split_seq_list);
+        merge_and_split(split_seq_list ,seq_id_list);   
+
+    }else if(seq_lens <= 10000 && seq_id_list.size() == 2){ 
         PLOGD << "处理两条 但不是很长的序列";
-        // star_align(seq_id_list);
+        std::vector<std::vector<MID_Seq>> not_split_seq_list;
+
+        for(int i = 0; i < seq_id_list.size(); i++){
+            std::vector<MID_Seq> tmp;
+            tmp.push_back(MID_Seq(All_seqs[seq_id_list[i]].content));
+            not_split_seq_list.push_back(tmp);
+        }
+
+        star_align(seq_id_list , not_split_seq_list);
+        merge_and_split(not_split_seq_list ,seq_id_list);
     }else{                                                 
         PLOGD << "序列数量太少，不比较";
     }
@@ -172,7 +197,6 @@ std::vector<std::vector<std::pair<int,int>>> build_index_and_chain(std::vector<i
                                               
                     // PLOGD << "location_seq : " << location_seq << " ,k-mer : " << All_seqs[seq_id_list[id - 1]].content.substr(location_seq, k_mer);
                     if(chain_table[id - 1][i / step].second == -1){
-                        
                         chain_table[id - 1][i / step] = {i / step , location_seq};
                         
                         seq_id_set.erase(id);
@@ -212,9 +236,13 @@ std::vector<std::vector<std::pair<int,int>>> build_index_and_chain(std::vector<i
 }
 void process_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table , int k_mer , std::vector<int> seq_id_list){
         
-    //cout_chain_table(chain_table);
-    
-
+    PLOGD << "==== process_chain_table ====";
+    cout_chain_table(chain_table);
+    for(int i = 0 ; i < chain_table.size(); i++){
+        for(int j = 0; j < chain_table[i].size(); j++){
+        	PLOGD << "chain_table[" << i << "][" << j << "] : " << chain_table[i][j].first << " : " << chain_table[i][j].second;
+        }
+    }
     // 处理交叉
     tbb::parallel_for_each(chain_table.begin(), chain_table.end(), [&](std::vector<std::pair<int,int>>& one_chain){
         std::vector<std::pair<int,int>> tmp_chain = get_lis(one_chain);
@@ -234,6 +262,8 @@ void process_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_tab
     //std::cout << std::endl;
 
     //cout_chain_table(chain_table);
+
+    PLOGD << "==== FINISH process_chain_table ====";    
 }
 std::vector<std::vector<std::pair<int, int>>> create_chain_(std::vector<std::vector<std::pair<int, int>>> chain_table , std::vector<int> seq_id_list,int k_mer){
     
@@ -268,7 +298,7 @@ std::vector<std::vector<std::pair<int, int>>> create_chain_(std::vector<std::vec
                 tmp_complete_chain.push_back(chain_table[j][i]);
             }
         }
-        if(tmp_cover_lens >= cover_lens - 1){
+        if(tmp_cover_lens >= cover_lens){
             for(int i = 0 ; i < tmp_complete_chain.size(); i++){
                 tmp_chain_table[i].push_back(tmp_complete_chain[i]);
             }
@@ -285,15 +315,15 @@ std::vector<std::vector<std::pair<int, int>>> create_chain_(std::vector<std::vec
         }
     }
     process_chain_table(tmp_chain_table, k_mer, seq_id_list);
-
+    cout_chain_table(tmp_chain_table);
     std::cout << "==== FINISH create_chain_ ====" << std::endl;
     return tmp_chain_table;
 }
 std::vector<std::vector<MID_Seq>> get_split_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table,std::vector<int>& seq_id_list , int k_mer){
-    std::cout << "===== get_split_chain_table =====" << std::endl;
+    PLOGD << "===== get_split_chain_table =====";
     std::vector<std::vector<std::pair<int,int>>> res_chain(seq_id_list.size());
     int pre = 0;
-    int spand = 1000;
+    int spand = 20000;
     for(int i = 0; i < chain_table[0].size() ; i++){ // 列遍历
         int location = chain_table[0][i].second;
         int distance = (location - pre);
@@ -322,12 +352,14 @@ std::vector<std::vector<MID_Seq>> get_split_chain_table(std::vector<std::vector<
     std::vector<std::vector<MID_Seq>> split_seq_list;
     std::vector<int> pre_location(seq_id_list.size() , 0);
     std::vector<MID_Seq> tmp_split_list;
+    // 第一个分割点
     for(int i = 0; i < res_chain.size() ; i ++){
         tmp_split_list.push_back(MID_Seq(All_seqs[seq_id_list[i]].content.substr(0,res_chain[i][0].second + k_mer)));
         pre_location[i] = res_chain[i][0].second;        
     }
     split_seq_list.push_back(tmp_split_list);
-    for(int j = 2; j < res_chain[0].size(); j ++){
+    //后续分割点
+    for(int j = 1; j < res_chain[0].size(); j ++){
         tmp_split_list.clear();
         for(int i = 0; i < res_chain.size() ; i ++){
             tmp_split_list.push_back(MID_Seq(All_seqs[seq_id_list[i]].content.substr(pre_location[i] + k_mer,res_chain[i][j].second - pre_location[i])));
@@ -345,7 +377,7 @@ std::vector<std::vector<MID_Seq>> get_split_chain_table(std::vector<std::vector<
     //     std::cout << "seq_id : " << seq_id_list[i] << ", seq_len : " << seq_lens[i] << std::endl;
     // }
     for(int i = 0; i < seq_id_list.size(); i++){
-        All_seqs[seq_id_list[i]].content = "";
+        All_seqs[seq_id_list[i]].content.clear();
     }
     return split_seq_list;
 }
@@ -511,6 +543,7 @@ void align_wfa_PSA(std::string & text , std::string & pattern, std::vector<std::
     // wfa::WFAlignerGapLinear aligner(3,1,wfa::WFAligner::Alignment,wfa::WFAligner::MemoryHigh); 
     aligner.alignEnd2End(pattern,text);
     process_cigar(aligner.getAlignment(), pattern,center_gap_list);
+    
 }
 void star_align(std::vector<int> seq_id_list , std::vector<std::vector<MID_Seq>>& split_seq_list){
     PLOGD << "process_more_seq_and_lens_less_10000 : seq_id_list";
@@ -523,32 +556,88 @@ void star_align(std::vector<int> seq_id_list , std::vector<std::vector<MID_Seq>>
     //     }
     //     PLOGD << " ===================== ";
     // }
-    tbb::task_arena limited_arena(1);
-    limited_arena.execute([&split_seq_list] {
-        tbb::parallel_for_each(split_seq_list.begin(), split_seq_list.end(),[&](std::vector<MID_Seq>& mid_seq){
-            std::string text_seq = mid_seq[0].content;
-            
-            for(int i = 1 ; i < mid_seq.size(); i++){
-                std::vector<std::pair<int,int>> tmp_center_list;
-                align_wfa_PSA(text_seq, mid_seq[i].content, tmp_center_list);
-                mid_seq[0].center_gap_list.insert(mid_seq[0].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
-                mid_seq[i].center_gap_list.insert(mid_seq[i].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
-            }
-            // 合并所有的中心序列gap ,合并所有交集
-            std::vector<std::pair<int,int>> center_merged_gaps = merge(mid_seq[0].center_gap_list);
-            //对中心序列进行插空
-            insert_gap(center_merged_gaps, mid_seq[0].content);
+    // 设置全局线程数限制，例如 4 个线程
+    PLOGD << "seq_id_list.size() : " << split_seq_list.size();
+    for(int i = 0; i < split_seq_list.size(); i++){
+        PLOGD << "i : " << i;
+        std::vector<MID_Seq>& mid_seq = split_seq_list[i];
+        std::string text_seq = mid_seq[0].content;
+        PLOGD << "text_seq.size() : " << text_seq.size();
+        for(int j = 1; j < mid_seq.size(); j++){
+            PLOGD << "content.size() : " << mid_seq[j].content.size();
+            std::vector<std::pair<int,int>> tmp_center_list;
+            align_wfa_PSA(text_seq, mid_seq[j].content, tmp_center_list);
+            mid_seq[0].center_gap_list.insert(mid_seq[0].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+            mid_seq[j].center_gap_list.insert(mid_seq[j].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+        }
+        // 合并所有的中心序列gap ,合并所有交集
+        std::vector<std::pair<int,int>> center_merged_gaps = merge(mid_seq[0].center_gap_list);
+        //对中心序列进行插空
+        insert_gap(center_merged_gaps, mid_seq[0].content);
 
-            std::sort(center_merged_gaps.begin(), center_merged_gaps.end(), [](const std::pair<int,int>& a, const std::pair<int,int>& b){
-                return a.first < b.first;
-            });
-            // 对其余序列进行插空
-            for(int i = 1; i < mid_seq.size(); i++){
-                filter_gap(mid_seq[i].self_gap_list,center_merged_gaps, mid_seq[i].center_gap_list);
-                insert_gap(mid_seq[i].self_gap_list, mid_seq[i].content);
-            }
+        std::sort(center_merged_gaps.begin(), center_merged_gaps.end(), [](const std::pair<int,int>& a, const std::pair<int,int>& b){
+            return a.first < b.first;
         });
-    });
+        // 对其余序列进行插空
+        for(int j = 1; j < mid_seq.size(); j++){
+            filter_gap(mid_seq[j].self_gap_list,center_merged_gaps, mid_seq[j].center_gap_list);
+            insert_gap(mid_seq[j].self_gap_list, mid_seq[j].content);
+        }
+    }
+    // tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, 2);
+
+    // tbb::parallel_for(tbb::blocked_range<int>(0, split_seq_list.size(), 5), [&split_seq_list](const tbb::blocked_range<int>& r) {
+    //     for(int i = r.begin(); i < r.end(); i++){
+    //         std::vector<MID_Seq>& mid_seq = split_seq_list[i];
+    //         std::string text_seq = mid_seq[0].content;
+    //         for(int j = 1; j < mid_seq.size(); j++){
+    //             std::vector<std::pair<int,int>> tmp_center_list;
+    //             align_wfa_PSA(text_seq, mid_seq[j].content, tmp_center_list);
+    //             mid_seq[0].center_gap_list.insert(mid_seq[0].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+    //             mid_seq[j].center_gap_list.insert(mid_seq[j].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+    //         }
+    //         // 合并所有的中心序列gap ,合并所有交集
+    //         std::vector<std::pair<int,int>> center_merged_gaps = merge(mid_seq[0].center_gap_list);
+    //         //对中心序列进行插空
+    //         insert_gap(center_merged_gaps, mid_seq[0].content);
+
+    //         std::sort(center_merged_gaps.begin(), center_merged_gaps.end(), [](const std::pair<int,int>& a, const std::pair<int,int>& b){
+    //             return a.first < b.first;
+    //         });
+    //         // 对其余序列进行插空
+    //         for(int j = 1; j < mid_seq.size(); j++){
+    //             filter_gap(mid_seq[j].self_gap_list,center_merged_gaps, mid_seq[j].center_gap_list);
+    //             insert_gap(mid_seq[j].self_gap_list, mid_seq[j].content);
+    //         }
+    //         // split_seq_list[i] = mid_seq;
+    //     }
+    // });
+    // tbb::parallel_for_each(split_seq_list.begin(), split_seq_list.end(),[&](std::vector<MID_Seq>& mid_seq){
+    //     int count = 0;
+    //     std::string text_seq = mid_seq[0].content;
+        
+    //     for(int i = 1 ; i < mid_seq.size(); i++){
+    //         std::cout << count ++ << std::endl;
+    //         std::vector<std::pair<int,int>> tmp_center_list;
+    //         align_wfa_PSA(text_seq, mid_seq[i].content, tmp_center_list);
+    //         mid_seq[0].center_gap_list.insert(mid_seq[0].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+    //         mid_seq[i].center_gap_list.insert(mid_seq[i].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+    //     }
+    //     // 合并所有的中心序列gap ,合并所有交集
+    //     std::vector<std::pair<int,int>> center_merged_gaps = merge(mid_seq[0].center_gap_list);
+    //     //对中心序列进行插空
+    //     insert_gap(center_merged_gaps, mid_seq[0].content);
+
+    //     std::sort(center_merged_gaps.begin(), center_merged_gaps.end(), [](const std::pair<int,int>& a, const std::pair<int,int>& b){
+    //         return a.first < b.first;
+    //     });
+    //     // 对其余序列进行插空
+    //     for(int i = 1; i < mid_seq.size(); i++){
+    //         filter_gap(mid_seq[i].self_gap_list,center_merged_gaps, mid_seq[i].center_gap_list);
+    //         insert_gap(mid_seq[i].self_gap_list, mid_seq[i].content);
+    //     }
+        
+    // });
 
 }
 
@@ -817,7 +906,7 @@ void insert_gap(std::vector<std::pair<int,int>>& gap_list , std::string& pattern
 
 
 void filter_gap(std::vector<std::pair<int,int>>& patter1_gap_list, 
-               std::vector<std::pair<int,int>> all_merged_gaps, 
+               std::vector<std::pair<int,int>>& all_merged_gaps, 
                std::vector<std::pair<int,int>>& center_gap_list) {
     // std::cout<< "=== filter_gap ====" <<std::endl;
     // std::cout<< "all_merged_gaps.size():" << all_merged_gaps.size() << std::endl;

@@ -112,9 +112,9 @@ int main(int argc, char* argv[]) {
 
     PLOGD << "===== START ALIGN =====";
     // 进行比对 1.对每个群组进行比对，
-    bool bo = true;
+    bool parallel_for_each_bo = true;
     
-    if(bo){
+    if(parallel_for_each_bo){
         tbb::parallel_for_each(cluster.TOP_clusters.begin(), cluster.TOP_clusters.end(), [&](auto& tmp){
             std::vector<int> seq_id_list = tmp.second;
             sort(tmp.second.begin() ,  tmp.second.end());
@@ -135,28 +135,80 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    
+    std::vector<std::vector<double>> new_distance_matrix;
     const int name_width = 10; // 序列名称列宽
     const int value_width = 12; // 数值列宽
     const int precision = 6; // 小数位数
+    std::set<int> is_set;
+    int count = 0;
+    for (auto& tmp : cluster.TOP_clusters) {
+        if (tmp.second.size() > 1)
+        {
+            for(int i = 0; i < tmp.second.size(); i++){
+                is_set.insert(tmp.second[i]);
+                std::cout << tmp.second[i] << " ";
+            }
+        }
+    }
+    new_distance_matrix.resize(All_seqs.size() - cluster.TOP_clusters.size() + 1, std::vector<double>(All_seqs.size() - cluster.TOP_clusters.size() + 1, 0));
 
-    // 打印表头
+
+    //打印表头
+    std::cout << std::endl;
     std::cout << std::setw(name_width) << " " << " "; // 左上角空白
-    for(int i = 0; i < distance_matrix.size(); i++)
-        std::cout << std::setw(value_width) << All_seqs[i].name.substr(0,5) << " ";
+    for(int i = 0; i < distance_matrix.size(); i++){
+        if(is_set.find(i) != is_set.end())
+        std::cout << std::setw(value_width) << All_seqs[i].name.substr(0,10) << " ";
+    }
+        
     std::cout << std::endl;
     
-    // 打印每一行
+    //打印每一行
+    int row = 0 , col = 0;
+    std::vector<int> seq_id_list;
     for(int i = 0; i < distance_matrix.size(); i++){
         // 打印行标签，左对齐
-        std::cout << std::left << std::setw(name_width) << All_seqs[i].name.substr(0,5) << " ";
-        
-        for(int j = 0; j < distance_matrix[i].size(); j++){
-            // 设置数值格式：固定小数位，右对齐
-            std::cout << std::right << std::fixed << std::setprecision(precision) 
-                      << std::setw(value_width) << distance_matrix[i][j] << " ";
+        if(is_set.find(i)!= is_set.end()){
+            seq_id_list.push_back(i);
+            std::cout << std::left << std::setw(name_width) << All_seqs[i].name.substr(0,10) << " ";
+            col = 0;
+            
+            for(int j = 0; j < distance_matrix[i].size(); j++){
+                // 设置数值格式：固定小数位，右对齐
+                if(is_set.find(j)!= is_set.end()){
+                    if(distance_matrix[i][j] == 0 && i != j){
+                        long long reP = FCGR_CU::get_Respoint(All_seqs[i].k_mer_list, All_seqs[j].k_mer_list);
+                        long long tmpA = All_seqs[i].A_A;
+                        long long tmpB = All_seqs[j].A_A;
+                        double tmp_smi = reP / (sqrt(tmpB)*sqrt(tmpA));
+                        distance_matrix[i][j] = 1 - tmp_smi;
+                    }
+                    new_distance_matrix[row][col++] = distance_matrix[i][j];
+
+                    std::cout << std::right << std::fixed << std::setprecision(precision) 
+                        << std::setw(value_width) << distance_matrix[i][j] << " ";
+                }
+                
+            }
+            std::cout << std::endl;
+            row++;
         }
-        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+    for(int i = 0; i < seq_id_list.size(); i++){
+        // 打印行标签，左对齐
+        
+            std::cout << std::left << std::setw(name_width) << All_seqs[seq_id_list[i]].name.substr(0,10) << " ";
+            col = 0;
+            row++;
+            for(int j = 0; j < new_distance_matrix[i].size(); j++){
+                // 设置数值格式：固定小数位，右对齐
+                    std::cout << std::right << std::fixed << std::setprecision(precision) 
+                        << std::setw(value_width) << new_distance_matrix[i][j] << " ";
+                
+            }
+            std::cout << std::endl;
     }
     
     // std::vector<int> seq_id_list;

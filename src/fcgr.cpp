@@ -68,12 +68,12 @@ namespace FCGR_CU {
 
             if (!this->hashMap[this->total_SeqList[i]]) {
                 long long tmpB = All_seqs[this->total_SeqList[i]].A_A;
-                long long reP = one_cluster::get_Respoint(All_seqs[long_id].k_mer_list , All_seqs[this->total_SeqList[i]].k_mer_list);
+                long long reP = get_Respoint(All_seqs[long_id].k_mer_list , All_seqs[this->total_SeqList[i]].k_mer_list);
                 double tmp_smi = reP / (sqrt(tmpB)*sqrt(tmpA));
                 //std::cout << "tmp_smi : " << tmp_smi << std::endl;
                 
-                distance_matrix[long_id][this->total_SeqList[i]] = tmp_smi;
-                distance_matrix[this->total_SeqList[i]][long_id] = tmp_smi;
+                distance_matrix[long_id][this->total_SeqList[i]] = 1 - tmp_smi;
+                distance_matrix[this->total_SeqList[i]][long_id] = 1 - tmp_smi;
 
                 if (tmp_smi >= this->sim) {
                     res.push_back(this->total_SeqList[i]);
@@ -84,7 +84,7 @@ namespace FCGR_CU {
         return res;
     }
 
-    long long one_cluster::get_Respoint(std::vector<int>& A_kmer_list, std::vector<int>& B_kmer_list) {
+    long long get_Respoint(std::vector<int>& A_kmer_list, std::vector<int>& B_kmer_list) {
         long long res = 0 ;
         int lens = A_kmer_list.size();
         tbb::enumerable_thread_specific<long long> local_resPoints(0);

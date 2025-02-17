@@ -70,5 +70,4 @@ typedef struct MID_Seq
 #include "fcgr.h"
 #include "cluster.h"
 #include "center_align.h"
-#include "fmindex.h"
 #endif //TOP_H

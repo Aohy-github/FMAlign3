@@ -48,7 +48,7 @@ std::vector<Seq> get_sequence(const std::string& filename){
         // std::cout << "lens :" << a.lens << std::endl;
         return a.lens > b.lens; // 从大到小
     });
-    distance_matrix.resize(seqs.size(), std::vector<double>(seqs.size(), -1));
+    distance_matrix.resize(seqs.size(), std::vector<double>(seqs.size(), 0));
     return seqs;
 }
 

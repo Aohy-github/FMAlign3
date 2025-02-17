@@ -40,7 +40,7 @@ std::vector<std::pair<int,int>> merge(std::vector<std::pair<int,int>> gap_list);
 void insert_gap(std::vector<std::pair<int,int>>& gap_list , std::string& pattern);
 
 void filter_gap(std::vector<std::pair<int,int>>& patter1_gap_list, 
-               std::vector<std::pair<int,int>> all_merged_gaps, 
+               std::vector<std::pair<int,int>>& all_merged_gaps, 
                std::vector<std::pair<int,int>>& center_gap_list);
 
 #endif //ALIGN_H

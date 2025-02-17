@@ -1,3 +1,15 @@
-[submodule "plog"]
-    path = plog
+[submodule "submodule/plog"]
+    path = submodule/plog
     url = git@github.com:SergiusTheBest/plog.git
+
+[submodule "submodule/WFA2-lib"]
+    path = submodule/WFA2-lib
+    url = git@github.com:smarco/WFA2-lib.git
+
+[submodule "submodule/oneTBB"]
+    path = submodule/oneTBB
+    url = git@github.com:uxlfoundation/oneTBB.git
+
+[submodule "submodule/spdlog"]
+    path = submodule/spdlog
+    url = git@github.com:gabime/spdlog.git
