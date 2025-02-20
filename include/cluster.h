@@ -15,15 +15,13 @@ namespace Cluster {
             std::map<int,std::vector<int>> TOP_clusters;
             // 相对中心序列的距离
             std::map<int,double> to_center_distance;
+            std::map<int,std::vector<int>> TOP_clusters_sort;
         int selectLongest();
-        //void get_cluster_one();
+        
         void get_cluster_two();
-        void get_cluster_three();
+        void get_align_sort();
         std::vector<int> cluster_for_lens(int longest_id);
     };
-
-
-
 } // Cluster
 
 #endif //CLUSTER_H

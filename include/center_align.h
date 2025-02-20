@@ -13,7 +13,7 @@ std::vector<std::vector<std::pair<int,int>>> build_index_and_chain(std::vector<i
 void process_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table , int k_mer , std::vector<int> seq_id_list);
 std::vector<std::vector<MID_Seq>> get_split_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table,std::vector<int>& seq_id_list , int k_mer);
 std::vector<std::vector<std::pair<int, int>>> create_chain_(std::vector<std::vector<std::pair<int, int>>> chain_table , std::vector<int> seq_id_list,int k_mer);
-bool merge_and_split(std::vector<std::vector<MID_Seq>>& split_seq_list , std::vector<int> seq_id_list);
+bool merge_split(std::vector<std::vector<MID_Seq>>& split_seq_list , std::vector<int> seq_id_list);
 
 int get_best_location_ssw(int main_location,int center_id , int querry_location , int seq_id,int k_mer);
 
@@ -26,8 +26,6 @@ std::vector<std::pair<int, int>> get_lis(const std::vector<std::pair<int, int>>&
 void cout_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table);
 
 void star_align(std::vector<int> seq_id_list , std::vector<std::vector<MID_Seq>>& split_seq_list);
-
-void process_seq_clusters_(std::map<int,std::vector<int>> clusters);
 
 std::string get_common_seq(std::vector<int> seq_id_list);
 

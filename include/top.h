@@ -18,6 +18,7 @@
 // #include <thrust/functional.h>
 #include <plog/Log.h> // 必须包含
 #include <plog/Initializers/RollingFileInitializer.h>
+#include <plog/Formatters/TxtFormatter.h>
 #include <algorithm>
 #include <tbb/enumerable_thread_specific.h>
 #include <tbb/parallel_pipeline.h>
@@ -26,6 +27,7 @@
 #include <tbb/concurrent_vector.h>
 #include <tbb/tbb.h>
 #include <sys/stat.h>
+
 #include "bwt.h"
 #include "ssw_cpp.h"
 #include "ssw.h"
@@ -64,6 +66,7 @@ typedef struct MID_Seq
     std::vector<std::pair<int,int>> self_gap_list;
     MID_Seq(std::string seq):content(seq) {};
 }MID_Seq;
+
 
 
 #include "readfile.h"

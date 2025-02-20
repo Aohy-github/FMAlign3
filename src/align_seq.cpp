@@ -23,7 +23,7 @@ void mode_pick(std::vector<int> seq_id_list) {
         std::vector<std::vector<MID_Seq>> split_seq_list = get_split_chain_table(chain_table,seq_id_list, k_mer);
         
         star_align(seq_id_list , split_seq_list);
-        merge_and_split(split_seq_list ,seq_id_list);
+        merge_split(split_seq_list ,seq_id_list);
         std::cout << "==== FINISH BUILD INDEX AND CHAIN ====" << std::endl;
     }
     else if(seq_lens <= 10000 && seq_id_list.size() >= 2){ 
@@ -31,18 +31,15 @@ void mode_pick(std::vector<int> seq_id_list) {
 
         /**
          * 1.进行中心序列的比对
-         * 
          */
         std::vector<std::vector<MID_Seq>> not_split_seq_list;
-
+        std::vector<MID_Seq> tmp;
         for(int i = 0; i < seq_id_list.size(); i++){
-            std::vector<MID_Seq> tmp;
             tmp.push_back(MID_Seq(All_seqs[seq_id_list[i]].content));
-            not_split_seq_list.push_back(tmp);
         }
-
+        not_split_seq_list.push_back(tmp);
         star_align(seq_id_list , not_split_seq_list);
-        merge_and_split(not_split_seq_list,seq_id_list);
+        merge_split(not_split_seq_list,seq_id_list);
         // 输出中间结果
         // for(int i = 0; i < seq_id_list.size(); i++){
         //     PLOGD <<" , seq_name : " << All_seqs[seq_id_list[i]].name << ": " << All_seqs[seq_id_list[i]].content;
@@ -53,7 +50,7 @@ void mode_pick(std::vector<int> seq_id_list) {
         std::vector<std::vector<MID_Seq>> split_seq_list = get_split_chain_table(chain_table,seq_id_list, k_mer);
         
         star_align(seq_id_list , split_seq_list);
-        merge_and_split(split_seq_list ,seq_id_list);   
+        merge_split(split_seq_list ,seq_id_list);   
 
     }else if(seq_lens <= 10000 && seq_id_list.size() == 2){ 
         PLOGD << "处理两条 但不是很长的序列";
@@ -66,7 +63,7 @@ void mode_pick(std::vector<int> seq_id_list) {
         }
 
         star_align(seq_id_list , not_split_seq_list);
-        merge_and_split(not_split_seq_list ,seq_id_list);
+        merge_split(not_split_seq_list ,seq_id_list);
     }else{                                                 
         PLOGD << "序列数量太少，不比较";
     }
@@ -557,7 +554,7 @@ void star_align(std::vector<int> seq_id_list , std::vector<std::vector<MID_Seq>>
     //     PLOGD << " ===================== ";
     // }
     // 设置全局线程数限制，例如 4 个线程
-    PLOGD << "seq_id_list.size() : " << split_seq_list.size();
+    PLOGD << "split_seq_list.size() : " << split_seq_list.size();
     for(int i = 0; i < split_seq_list.size(); i++){
         PLOGD << "i : " << i;
         std::vector<MID_Seq>& mid_seq = split_seq_list[i];
@@ -696,32 +693,6 @@ void align_wfa_profile(std::string & text , std::string & pattern){
 
     pattern = res_patter;
     text = res_text;
-}
-void process_seq_clusters_(std::map<int,std::vector<int>> clusters){
-    PLOGD << "process_more_seq_and_lens_less_10000 : clusters";
-    // 如果主序列插入了多余的空格，那么其代表的群组序列也要插入空格
-    // 生成一致性序列
-    std::vector<std::pair<int,std::string>> common_seq_list;
-    for(auto& tmp : clusters){
-        if(tmp.second.size() > 1){
-            std::cout << "tmp.first : " << tmp.first << std::endl;
-            std::cout << All_seqs[tmp.first].name << std::endl;
-            common_seq_list.push_back({tmp.first,get_common_seq(tmp.second)});
-            break;
-        }else{
-            std::cout << "tmp.first : " << tmp.first << std::endl;
-            std::cout << All_seqs[tmp.first].name << std::endl;
-            common_seq_list.push_back({tmp.first,All_seqs[tmp.second[0]].content});
-        }
-    }
-    
-    for(int i = 0; i < common_seq_list.size(); i++){
-        align_wfa_profile(common_seq_list[i].second, common_seq_list[0].second);
-    }
-    for(int i = 0; i < common_seq_list.size(); i++){
-        All_seqs[common_seq_list[i].first].content = common_seq_list[i].second;
-    }
-
 }
 
 std::string get_common_seq(std::vector<int> seq_id_list){
@@ -968,14 +939,25 @@ void filter_gap(std::vector<std::pair<int,int>>& patter1_gap_list,
     }
 }
 
-bool merge_and_split(std::vector<std::vector<MID_Seq>>& split_seq_list , std::vector<int> seq_id_list){
+bool merge_split(std::vector<std::vector<MID_Seq>>& split_seq_list , std::vector<int> seq_id_list){
+    PLOGD << "===== merge_and_split =====";
+    PLOGD << "seq_id_list.size() : " << seq_id_list.size();
+    PLOGD << "split_seq_list.size() : " << split_seq_list.size();
+    PLOGD << "split_seq_list[0].size() : " << split_seq_list[0].size();
+    PLOGD << "All_seqs.size() : " << All_seqs.size();
+    
+    for(int i = 0 ; i < seq_id_list.size(); i++){
+        All_seqs[seq_id_list[i]].content.clear();
+    }
     for(int i = 0; i < split_seq_list.size(); i++){
     	std::vector<MID_Seq> tmp = split_seq_list[i];
         for(int j = 0; j < tmp.size(); j++){
-        	//PLOGD << tmp[j].content;
+            PLOGD << "id :" << seq_id_list[j] << " , content : " << tmp[j].content;
             All_seqs[seq_id_list[j]].content += tmp[j].content;
         }
         //PLOGD << " ===================== ";
     }
+    PLOGD << "All_seqs.size() : " << All_seqs.size();
     return true;
 }
+

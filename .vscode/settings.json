@@ -91,6 +91,7 @@
         "ios": "cpp",
         "strstream": "cpp",
         "complex": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "expected": "cpp"
     }
 }

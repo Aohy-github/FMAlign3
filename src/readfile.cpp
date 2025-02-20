@@ -59,6 +59,7 @@ bool out_sequence(const std::string& filename){
         printf("open file failed");
         exit(0);
     }
+    PLOGD << "All_seqs.size() : " << All_seqs.size();
     for(auto& seq : All_seqs) {
         //std::cout << "seq.size():" << seq.content.size() << " seq.name :" << seq.name << std::endl;
         outfile << seq.name << std::endl;

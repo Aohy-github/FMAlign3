@@ -13,3 +13,8 @@
 [submodule "submodule/spdlog"]
     path = submodule/spdlog
     url = git@github.com:gabime/spdlog.git
+
+[submodule "submodule/decenttree"]
+    path = submodule/decenttree
+    url = git@github.com:iqtree/decenttree.git
+   
