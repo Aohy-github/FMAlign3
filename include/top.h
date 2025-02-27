@@ -57,18 +57,6 @@ typedef struct Sequences
 inline std::vector<Seq> All_seqs;
 inline std::vector<std::vector<double>> distance_matrix;
 
-typedef struct MID_Seq
-{
-    std::string content;   
-    // 保存所比对的中心序列的间隔
-    std::vector<std::pair<int,int>> center_gap_list;
-    // 保存自己的的间隔
-    std::vector<std::pair<int,int>> self_gap_list;
-    MID_Seq(std::string seq):content(seq) {};
-}MID_Seq;
-
-
-
 #include "readfile.h"
 #include "fcgr.h"
 #include "cluster.h"

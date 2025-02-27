@@ -1,89 +1,9 @@
 #include "top.h"
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
-void out_distance_matrix(Cluster::Clu& cluster){
-    std::vector<std::vector<double>> new_distance_matrix;
-    const int name_width = 10; // 序列名称列宽
-    const int value_width = 12; // 数值列宽
-    const int precision = 6; // 小数位数
-    std::set<int> is_set;    // 已经处理的群组
-    std::vector<int> matrix_id_list;
-    int count = 0;
-    
-    for (auto& tmp : cluster.TOP_clusters) {
-        if (tmp.second.size() > 1)
-        {
-            for(int i = 0; i < tmp.second.size(); i++){
-                is_set.insert(tmp.second[i]);
-                std::cout << tmp.second[i] << " ";
-            }
-            count += tmp.second.size() - 1;
-        }
-    }
-    new_distance_matrix.resize(All_seqs.size() - count, std::vector<double>(All_seqs.size() - count, 0));
-
-    //打印每一行
-    int row = 0 , col = 0;
-    std::cout << std::endl;
-    std::vector<int> seq_id_list;
-    for(int i = 0; i < distance_matrix.size(); i++){
-        // 打印行标签，左对齐
-        if(is_set.find(i)!= is_set.end()){
-            seq_id_list.push_back(i);
-            std::cout << std::left << std::setw(name_width) << All_seqs[i].name.substr(0,10) << " ";
-            col = 0;
-            
-            for(int j = 0; j < distance_matrix[i].size(); j++){
-                // 设置数值格式：固定小数位，右对齐
-                if(is_set.find(j)!= is_set.end()){
-                    if(distance_matrix[i][j] == 0 && i != j){
-                        long long reP = FCGR_CU::get_Respoint(All_seqs[i].k_mer_list, All_seqs[j].k_mer_list);
-                        long long tmpA = All_seqs[i].A_A;
-                        long long tmpB = All_seqs[j].A_A;
-                        double tmp_smi = reP / (sqrt(tmpB)*sqrt(tmpA));
-                        distance_matrix[i][j] = 1 - tmp_smi;
-                    }
-                    new_distance_matrix[row][col++] = distance_matrix[i][j];
-
-                    std::cout << std::right << std::fixed << std::setprecision(precision) 
-                        << std::setw(value_width) << distance_matrix[i][j] << " ";
-                }
-                
-            }
-            std::cout << std::endl;
-            row++;
-        }
-    }
-    std::cout << std::endl;
-    std::cout << std::endl;
-    for(int i = 0; i < seq_id_list.size(); i++){
-        // 打印行标签，左对齐
-        
-            std::cout << std::left << std::setw(name_width) << All_seqs[seq_id_list[i]].name.substr(0,10) << " ";
-            col = 0;
-            row++;
-            for(int j = 0; j < new_distance_matrix[i].size(); j++){
-                // 设置数值格式：固定小数位，右对齐
-                    std::cout << std::right << std::fixed << std::setprecision(precision) 
-                        << std::setw(value_width) << new_distance_matrix[i][j] << " ";
-                
-            }
-            std::cout << std::endl;
-    }
-
-    //打印表头
-    std::cout << std::endl;
-    std::cout << std::setw(name_width) << " " << " "; // 左上角空白
-    for(int i = 0; i < distance_matrix.size(); i++){
-        if(is_set.find(i) != is_set.end())
-        std::cout << std::setw(value_width) << All_seqs[i].name.substr(0,10) << " ";
-    }
-        
-    std::cout << std::endl;
-}
 
 int main(int argc, char* argv[]) {
-    plog::init(plog::debug, "logfile.txt" , 100000, 1);
+    plog::init(plog::debug, "logfile.txt",100000, 1);
     auto top_time = std::chrono::high_resolution_clock::now();
     
 
@@ -138,18 +58,21 @@ int main(int argc, char* argv[]) {
 
     // 获取序列
     All_seqs = get_sequence(filename);
-    PLOGD << "get seqs : "<<All_seqs.size();
 
     if(classify == "false"){
         // 直接进行中心序列比对
-        std::vector<int> seq_id_list;
+        std::vector<Process_seq> process_seq_list;
         for(int i = 0; i < All_seqs.size(); i++){
-            seq_id_list.push_back(i);
+            process_seq_list.push_back(Process_seq(i,All_seqs[i].content));
         }
-        mode_pick(seq_id_list);
+        mode_pick(process_seq_list);
+
+        for(int i = 0 ; i < process_seq_list.size() ; i ++){
+            All_seqs[process_seq_list[i].seq_id].content = process_seq_list[i].content;
+            // PLOGD << process_seq_list[i].content;
+        }
     }else{
         // 执行中心+渐进式比对
-        PLOGD << "===== START FCGR =====";
 
         auto CPU_start = std::chrono::high_resolution_clock::now();
         oneapi::tbb::parallel_for_each(All_seqs.begin(), All_seqs.end(), [&](Seq& one){
@@ -200,33 +123,37 @@ int main(int argc, char* argv[]) {
 
         tbb::parallel_for_each(cluster.TOP_clusters.begin(), cluster.TOP_clusters.end(), [&](auto& tmp){
             if(tmp.second.size() > 1){
-                std::vector<int> seq_id_list = tmp.second;
-                sort(tmp.second.begin() ,  tmp.second.end());
-                mode_pick(tmp.second);
+                std::vector<Process_seq> process_seq_list;
+                for(int i = 0; i < tmp.second.size(); i++){
+                    process_seq_list.push_back(Process_seq(tmp.second[i],All_seqs[tmp.second[i]].content));
+                }
+                sort(process_seq_list.begin() ,  process_seq_list.end(),[](Process_seq &A , Process_seq &B){
+                    return A.content.size() > B.content.size();
+                });
+                mode_pick(process_seq_list);
+                for(int i = 0 ; i < process_seq_list.size() ; i ++){
+                    All_seqs[process_seq_list[i].seq_id].content = process_seq_list[i].content;
+                }
             }
         });
 
         PLOGD << "++ finish all align cluster ++";
         
-        // 整理所有的群组
-        cluster.get_align_sort();
-
-        for(auto tmp : cluster.TOP_clusters_sort){
-            PLOGD << "list id : " << tmp.first;
-            PLOGD << "cluster count : " << tmp.second.size();
-            for(int i = 0 ; i < tmp.second.size(); i++){
-                PLOGD << "seq id : " << tmp.second[i];
-            }
-        }
-        // out_distance_matrix(cluster);
-        // 生成新的距离矩阵
         /**
          *  1.从每个群组中一条序列，计算剩余序列的距离矩阵 
          *  2.根据距离矩阵，计算指导树
          *  3.根据指导树进行序列比对（合并空格，对于新产生的空格，收集所有的空格情况，插回群组中）
          * 
          */
+        cluster.get_align_sort();
         
+        tbb::parallel_for_each(cluster.TOP_clusters.begin(), cluster.TOP_clusters.end(), [&](auto& tmp){
+            if(tmp.second.size() > 1){
+                std::vector<int> seq_id_list = tmp.second;
+                std::string seq1 = All_seqs[seq_id_list[0]].content;
+                Cluster::refresh_seq_content(seq_id_list,seq1);
+            }
+        });
     }
     
     out_sequence(outfilename);

@@ -1,15 +1,5 @@
 #/bin/bash/
-set -e
 
-trap 'echo "Error occurred at line $LINENO"' ERR
-
-cmake -B build
-make -C build
-
-
-if compgen -G "./tmp_file/*.fasta*" > /dev/null; then
-    rm ./tmp_file/*.fasta*
-fi
     # // data/truncated_sequences_1500.fasta
     # // data/Ecoli.fasta
     # //steps-512_0_NOT_U.fasta

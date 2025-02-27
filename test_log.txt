@@ -1,4 +1,1 @@
-==== FINISH MODE PICK ====time : 0.758993 ms
-Computing NJ-R-V tree took 0.000539556 sec (of wall-clock time) 0 sec (of CPU time)(0%)
-Root Mean Square Error was 0.00559
-----------------
+===== FINISH =====time : 1069.33 ms

@@ -22,6 +22,9 @@ namespace Cluster {
         void get_align_sort();
         std::vector<int> cluster_for_lens(int longest_id);
     };
+
+    std::string get_common_seq(std::vector<std::string> content_list);
+    void refresh_seq_content(std::vector<int>& seq_id_list , std::string seq1);
 } // Cluster
 
 #endif //CLUSTER_H
