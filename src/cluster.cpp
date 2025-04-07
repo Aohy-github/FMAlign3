@@ -132,7 +132,7 @@ namespace Cluster {
                     max_char = tmp.first;
                 }
             }
-            if(max_char != '-' && max_count >= content_list.size()* 0.6){
+            if(max_char != '-' && max_count >= content_list.size()* 0.8){
                 final_seq[i] = max_char;
             }else {
                 final_seq[i] = (content_list[0][0] >= 'A') ? 'N' : 'n';
@@ -235,7 +235,7 @@ namespace Cluster {
         std::string cmnd = "./include/decenttree ";
         std::string out_res_file = "out.tree";
         cmnd.append("-in ").append("distance_matrix.txt ")
-            .append("-t BIONJ-R ")
+            .append("-t NJ-R-D ")
             .append("-no-banner ")
             .append("-out ").append(out_res_file).append("> /dev/null");
 
@@ -356,33 +356,36 @@ namespace Cluster {
                 i = j - 1;  // 更新i，跳过已处理的部分
             }
         }
-        std::vector<int> seq_id_list1 = mid_seq_id.back();
-        mid_seq_id.pop_back();
+        if(mid_seq_id.size() >= 2){
+            std::vector<int> seq_id_list1 = mid_seq_id.back();
+            mid_seq_id.pop_back();
 
-        std::vector<std::string> content_list1;
-        for(int j = 0; j < seq_id_list1.size() ; j++){
-            content_list1.push_back(All_seqs[seq_id_list1[j]].content);
+            std::vector<std::string> content_list1;
+            for(int j = 0; j < seq_id_list1.size() ; j++){
+                content_list1.push_back(All_seqs[seq_id_list1[j]].content);
+                
+            }
+            std::string seq1 = Cluster::get_common_seq(content_list1);
+            int len1 = seq1.size();
+
+            std::vector<int> seq_id_list2 = mid_seq_id.back();
+            mid_seq_id.pop_back();
+            std::vector<std::string> content_list2;
+            for(int j = 0; j < seq_id_list2.size() ; j++){
+                content_list2.push_back(All_seqs[seq_id_list2[j]].content);
+            }
+            std::string seq2 = Cluster::get_common_seq(content_list2);
+            int len2 = seq2.size();
+            align_wfa_profile(seq2 , seq1);
             
+            if(seq1.size() != len1){
+                Cluster::refresh_seq_content(seq_id_list1,seq1);
+            }
+            if(seq2.size() != len2){
+                Cluster::refresh_seq_content(seq_id_list2,seq2);
+            }
         }
-        std::string seq1 = Cluster::get_common_seq(content_list1);
-        int len1 = seq1.size();
-
-        std::vector<int> seq_id_list2 = mid_seq_id.back();
-        mid_seq_id.pop_back();
-        std::vector<std::string> content_list2;
-        for(int j = 0; j < seq_id_list2.size() ; j++){
-            content_list2.push_back(All_seqs[seq_id_list2[j]].content);
-        }
-        std::string seq2 = Cluster::get_common_seq(content_list2);
-        int len2 = seq2.size();
-        align_wfa_profile(seq2 , seq1);
         
-        if(seq1.size() != len1){
-            Cluster::refresh_seq_content(seq_id_list1,seq1);
-        }
-        if(seq2.size() != len2){
-            Cluster::refresh_seq_content(seq_id_list2,seq2);
-        }
     }
    
 }

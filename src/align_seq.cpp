@@ -10,7 +10,7 @@ void mode_pick(std::vector<Process_seq>& process_seq_list) {
     int k_mer = 39;
     auto time_start = std::chrono::high_resolution_clock::now();
     //build_index_and_chain(seq_id_list , k_mer);
-    if(seq_lens >= 10000 && process_seq_list.size() > 2){   
+    if(seq_lens >= 100000 && process_seq_list.size() > 2){   
         /*
             1.构建fmindex，构建分割点
             3.整合分割点
@@ -23,7 +23,7 @@ void mode_pick(std::vector<Process_seq>& process_seq_list) {
         star_align(split_seq_list);
         merge_split(split_seq_list ,process_seq_list);
     }
-    else if(seq_lens <= 10000 && process_seq_list.size() >= 2){ 
+    else if(seq_lens <= 100000 && process_seq_list.size() >= 2){ 
 
         /**
          * 1.进行中心序列的比对
@@ -41,14 +41,14 @@ void mode_pick(std::vector<Process_seq>& process_seq_list) {
         // for(int i = 0; i < seq_id_list.size(); i++){
         //     PLOGD <<" , seq_name : " << All_seqs[seq_id_list[i]].name << ": " << All_seqs[seq_id_list[i]].content;
         // }
-    }else if(seq_lens >= 10000 && process_seq_list.size() == 2){ 
+    }else if(seq_lens >= 100000 && process_seq_list.size() == 2){ 
         std::vector<std::vector<std::pair<int,int>>> chain_table = build_index_and_chain(process_seq_list , k_mer);
         std::vector<std::vector<Align_Seq>> split_seq_list = get_split_chain_table(chain_table,process_seq_list, k_mer);
         
         star_align(split_seq_list);
         merge_split(split_seq_list ,process_seq_list);   
 
-    }else if(seq_lens <= 10000 && process_seq_list.size() == 2){ 
+    }else if(seq_lens <= 100000 && process_seq_list.size() == 2){ 
         std::vector<std::vector<Align_Seq>> not_split_seq_list;
 
         for(int i = 0; i < process_seq_list.size(); i++){
@@ -223,7 +223,7 @@ std::vector<std::vector<std::pair<int,int>>> build_index_and_chain(std::vector<P
 }
 void process_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table){
         
-    cout_chain_table(chain_table);
+    //cout_chain_table(chain_table);
     // for(int i = 0 ; i < chain_table.size(); i++){
     //     for(int j = 0; j < chain_table[i].size(); j++){
     //     	PLOGD << "chain_table[" << i << "][" << j << "] : " << chain_table[i][j].first << " : " << chain_table[i][j].second;
@@ -306,7 +306,7 @@ std::vector<std::vector<std::pair<int, int>>> create_chain_(std::vector<std::vec
         }
     }
     process_chain_table(tmp_chain_table);
-    cout_chain_table(tmp_chain_table);
+    //cout_chain_table(tmp_chain_table);
     return tmp_chain_table;
 }
 std::vector<std::vector<Align_Seq>> get_split_chain_table(std::vector<std::vector<std::pair<int,int>>>& chain_table,std::vector<Process_seq>& process_seq_list , int k_mer){
@@ -337,7 +337,7 @@ std::vector<std::vector<Align_Seq>> get_split_chain_table(std::vector<std::vecto
     for(int i = 0; i < process_seq_list.size(); i++){
         res_chain[i].push_back({process_seq_list[i].content.size(),process_seq_list[i].content.size() - k_mer});
     }
-    cout_chain_table(res_chain);
+    //cout_chain_table(res_chain);
 
     std::vector<std::vector<Align_Seq>> split_seq_list;
     std::vector<int> pre_location(process_seq_list.size() , 0);
@@ -535,7 +535,7 @@ void align_wfa_PSA(std::string & text , std::string & pattern, std::vector<std::
 
     int text_size = text.size();
  
-    wfa::WFAlignerGapAffine aligner(2,3,1,wfa::WFAligner::Alignment,wfa::WFAligner::MemoryHigh); 
+    wfa::WFAlignerGapAffine aligner(1,3,1,wfa::WFAligner::Alignment,wfa::WFAligner::MemoryHigh); 
     // wfa::WFAlignerGapLinear aligner(3,1,wfa::WFAligner::Alignment,wfa::WFAligner::MemoryHigh); 
     aligner.alignEnd2End(pattern,text);
     process_cigar(aligner.getAlignment(), pattern,center_gap_list);
@@ -558,12 +558,14 @@ void star_align(std::vector<std::vector<Align_Seq>>& split_seq_list){
         std::vector<Align_Seq>& one_col = split_seq_list[i];
         std::string text_seq = one_col[0].content;
         // PLOGD << "text_seq.size() : " << text_seq.size();
-        for(int j = 1; j < one_col.size(); j++){
+        {
+            for(int j = 1; j < one_col.size(); j++){
             // PLOGD << "content.size() : " << one_col[j].content.size();
-            std::vector<std::pair<int,int>> tmp_center_list;
-            align_wfa_PSA(text_seq, one_col[j].content, tmp_center_list);
-            one_col[0].center_gap_list.insert(one_col[0].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
-            one_col[j].center_gap_list.insert(one_col[j].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+                std::vector<std::pair<int,int>> tmp_center_list;
+                align_wfa_PSA(text_seq, one_col[j].content, tmp_center_list);
+                one_col[0].center_gap_list.insert(one_col[0].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+                one_col[j].center_gap_list.insert(one_col[j].center_gap_list.end(), tmp_center_list.begin(), tmp_center_list.end());
+            }
         }
         // 合并所有的中心序列gap ,合并所有交集
         std::vector<std::pair<int,int>> center_merged_gaps = merge(one_col[0].center_gap_list);
@@ -673,7 +675,7 @@ void align_wfa_profile(std::string & text , std::string & pattern){
     std::string res_patter = "";
     std::string res_text = "";
     
-    wfa::WFAlignerGapAffine aligner(2,3,1,wfa::WFAligner::Alignment,wfa::WFAligner::MemoryHigh); // 进行对齐需要多少消耗
+    wfa::WFAlignerGapAffine aligner(1,3,1,wfa::WFAligner::Alignment,wfa::WFAligner::MemoryHigh); // 进行对齐需要多少消耗
     
     aligner.alignEnd2End(pattern,text);
     process_cigar_two(aligner.getAlignment(), pattern,res_patter,text,res_text);
