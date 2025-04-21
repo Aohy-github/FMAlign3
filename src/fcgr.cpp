@@ -23,11 +23,13 @@ namespace FCGR_CU {
         int lens = content.size();
         unsigned int hash_val = 0;
 
-        for (int i = 0; i < k; i++) { // 0-5
+        for (int i = 0; i < k; i++) { //读取前 k 位碱基
             hash_val = (hash_val << 2) | char_to_code[content[i]];
         }
+
         hash_val &= mask;
         k_mer_CPU[hash_val & mask]++;
+        
         //std::cout << std::endl;
         for (int j = 6; j < lens; j++) {
             hash_val = (hash_val << 2) | char_to_code[content[j]];;
