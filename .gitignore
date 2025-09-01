@@ -12,3 +12,4 @@ out_res/
 .idea/
 .cmake-build-debug
 logfile.txt
+*.txt

@@ -1,13 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
-# project(Crossfire LANGUAGES CUDA CXX)
 project(Crossfire CXX C)
 
-# 指定使用 GCC 12 和 G++ 12
-# set(CMAKE_C_COMPILER gcc-12)
-# set(CMAKE_CXX_COMPILER g++-12)
-
-# set(CMAKE_CUDA_STANDARD 20)
-# set(CMAKE_CUDA_STANDARD_REQUIRED True)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -30,7 +23,6 @@ find_package(Threads REQUIRED)
 
 # 查找并包含 OpenMP 库
 find_package(OpenMP REQUIRED)
-
 
 # 添加可执行文件时只包含源文件
 add_executable(Crossfire

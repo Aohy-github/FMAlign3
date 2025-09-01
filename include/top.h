@@ -9,13 +9,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <cuda_runtime_api.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 #include <map>
-// #include <thrust/device_vector.h>
-// #include <thrust/transform_reduce.h>
-// #include <thrust/functional.h>
 #include <plog/Log.h> // 必须包含
 #include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Formatters/TxtFormatter.h>
